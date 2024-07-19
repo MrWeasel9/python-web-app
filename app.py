@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
@@ -8,6 +9,16 @@ tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://raduDB:student@localhost:5432/chatbot_db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+# Define a model for the database
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_message = db.Column(db.Text, nullable=False)
+    bot_response = db.Column(db.Text, nullable=False)
 
 @app.route("/")
 def index():
@@ -16,6 +27,12 @@ def index():
 @app.route("/get", methods=["GET", "POST"])
 def chat():
     msg = request.form["msg"]
+    response = get_Chat_response(msg)
+
+    message = Message(user_message=msg, bot_response=response)
+    db.session.add(message)
+    db.session.commit()
+    
     return get_Chat_response(msg)
 
 def get_Chat_response(text):
