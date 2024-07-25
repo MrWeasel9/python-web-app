@@ -1,8 +1,8 @@
-from flask import Flask, request, jsonify, make_response, render_template
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, request, jsonify, make_response, render_template # type: ignore
+from flask_sqlalchemy import SQLAlchemy # type: ignore
 from os import environ
 
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer # type: ignore
 
 tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
@@ -33,7 +33,9 @@ class User(db.Model):
     def json(self):
         return {'id': self.id,'username': self.username, 'email': self.email}
 
-db.create_all()
+# Ensure the database tables are created within an app context
+with app.app_context():
+    db.create_all()
 
 @app.route("/")
 def index():

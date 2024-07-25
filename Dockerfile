@@ -1,10 +1,4 @@
-FROM python:3.6-slim-buster
-
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y \
-    gcc \
-    libpq-dev
+FROM python:3.9-slim-buster
 
 # Set working directory
 WORKDIR /app
