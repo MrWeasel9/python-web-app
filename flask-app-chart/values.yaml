@@ -1,0 +1,44 @@
+# Flask Application
+image:
+  repository: mrweasel99/python-web-app
+  tag: latest
+
+env:
+  - name: DB_URL
+    value: postgresql://postgres:postgres@bitnami-postgres-postgresql.default.svc.cluster.local:5432/postgres
+
+service:
+  type: LoadBalancer
+  port: 4000
+
+# Ingress
+ingress:
+  enabled: false
+  className: nginx
+  hosts:
+    - host: my-flask-app.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+labels:
+  update: "1"
