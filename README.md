@@ -100,4 +100,4 @@ Once the application is deployed, you can access it via the Kubernetes service. 
 ```bash
 kubectl get svc my-flask-app -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
 ```
-Then, on any web browser just use http://<your-ip-address>:4000/
+Then, on any web browser just use http://your-ip-address:4000/
