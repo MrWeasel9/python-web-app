@@ -4,8 +4,8 @@ pipeline {
     environment {
         // Define environment variables for your project
         KOPS_STATE_STORE = 'gs://your-kops-state-store'
-        CLUSTER_NAME = 'your-cluster-name'
-        DOCKER_REGISTRY = 'your-docker-registry'
+        CLUSTER_NAME = 'simple.k8s.local'
+        DOCKER_REGISTRY = 'mrweasel99'
         FLASK_IMAGE = "${DOCKER_REGISTRY}/flask-app:latest"
         HELM_CHART_DIR = './flask-chart'
         KUBECONFIG_ID = 'your-kubeconfig-credentials-id'
@@ -15,7 +15,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Check out the source code from the Git repository
-                git branch: 'main', url: 'https://github.com/<your-username>/<your-repo>.git'
+                git branch: 'development', url: 'https://github.com/MrWeasel9/python-web-app.git'
             }
         }
 
@@ -26,7 +26,7 @@ pipeline {
                 sh 'exec -l $SHELL'
                 sh 'gcloud init'
                 sh 'gcloud auth login'
-                sh 'gcloud config set project <YOUR_PROJECT_ID>'
+                sh 'gcloud config set project internship-project-435019'
             }
         }
 
@@ -45,7 +45,7 @@ pipeline {
                     // Create Kubernetes cluster with kOps
                     sh 'kops create cluster --name=${CLUSTER_NAME} --zones=us-central1-a --state=${KOPS_STATE_STORE}'
                     sh 'kops update cluster ${CLUSTER_NAME} --yes'
-                    sh 'kops validate cluster'
+                    sh 'kops validate cluster --wait 4m'
                 }
             }
         }
