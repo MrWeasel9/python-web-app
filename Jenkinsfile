@@ -8,6 +8,7 @@ pipeline {
         DOCKER_REGISTRY = 'mrweasel99'
         FLASK_IMAGE = "${DOCKER_REGISTRY}/flask-app:latest"
         HELM_CHART_DIR = './flask-chart'
+        KUBECONFIG_ID = 'your-kubeconfig-credentials-id'
         GOOGLE_APPLICATION_CREDENTIALS = credentials('gcloud-service-account') // Use the credentials ID here
         CLOUD_SDK_DIR = '/var/lib/jenkins/google-cloud-sdk'
     }
@@ -148,7 +149,7 @@ pipeline {
     post {
         always {
             // Clean workspace after build
-            script {
+            node {
                 cleanWs()
             }
         }
