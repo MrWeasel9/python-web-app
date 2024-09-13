@@ -8,8 +8,8 @@ pipeline {
         DOCKER_REGISTRY = 'mrweasel99'
         FLASK_IMAGE = "${DOCKER_REGISTRY}/flask-app:latest"
         HELM_CHART_DIR = './flask-chart'
-        KUBECONFIG_ID = 'your-kubeconfig-credentials-id'
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('c7f34f26-88e1-4487-af16-b47e1dc0b47a') // Use the credentials ID here
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcloud-service-account') // Use the credentials ID here
+        CLOUD_SDK_DIR = '/var/lib/jenkins/google-cloud-sdk'
     }
 
     stages {
@@ -20,12 +20,29 @@ pipeline {
             }
         }
 
-        stage('Install gcloud SDK') {
+        stage('Install/Update gcloud SDK') {
             steps {
-                // Install the gcloud SDK
-                sh 'curl https://sdk.cloud.google.com | bash'
-                sh 'source ~/.bashrc' // Refresh the bash session
-                sh 'gcloud --version' // Verify installation
+                script {
+                    // Check if Google Cloud SDK is installed
+                    def isInstalled = sh(script: "test -d ${CLOUD_SDK_DIR}", returnStatus: true) == 0
+                    if (isInstalled) {
+                        // Update existing SDK
+                        sh '''
+                        source ${CLOUD_SDK_DIR}/google-cloud-sdk/path.bash.inc
+                        gcloud components update --quiet
+                        '''
+                    } else {
+                        // Install Google Cloud SDK
+                        sh '''
+                        curl https://sdk.cloud.google.com | bash
+                        mkdir -p ${CLOUD_SDK_DIR}
+                        curl -o google-cloud-sdk.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/google-cloud-sdk.tar.gz
+                        tar -C ${CLOUD_SDK_DIR} -xzf google-cloud-sdk.tar.gz
+                        source ${CLOUD_SDK_DIR}/google-cloud-sdk/path.bash.inc
+                        gcloud --version
+                        '''
+                    }
+                }
             }
         }
 
@@ -60,7 +77,7 @@ pipeline {
                     sh '''
                     kops create cluster --name=${CLUSTER_NAME} --zones=us-central1-a --state=${KOPS_STATE_STORE}
                     kops update cluster ${CLUSTER_NAME} --yes
-                    kops validate cluster --wait 5m
+                    kops validate cluster --wait 4m
                     kops export kubeconfig --admin
                     '''
                 }
