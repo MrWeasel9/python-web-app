@@ -3,12 +3,13 @@ pipeline {
 
     environment {
         // Define environment variables for your project
-        KOPS_STATE_STORE = 'gs://your-kops-state-store'
+        KOPS_STATE_STORE = 'gs://radu-kubernetes-clusters/'
         CLUSTER_NAME = 'simple.k8s.local'
         DOCKER_REGISTRY = 'mrweasel99'
         FLASK_IMAGE = "${DOCKER_REGISTRY}/flask-app:latest"
         HELM_CHART_DIR = './flask-chart'
         KUBECONFIG_ID = 'your-kubeconfig-credentials-id'
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('c7f34f26-88e1-4487-af16-b47e1dc0b47a') // Use the credentials ID here
     }
 
     stages {
@@ -23,19 +24,32 @@ pipeline {
             steps {
                 // Install the gcloud SDK
                 sh 'curl https://sdk.cloud.google.com | bash'
-                sh 'exec -l $SHELL'
-                sh 'gcloud init'
-                sh 'gcloud auth login'
-                sh 'gcloud config set project internship-project-435019'
+                sh 'source ~/.bashrc' // Refresh the bash session
+                sh 'gcloud --version' // Verify installation
+            }
+        }
+
+        stage('Authenticate gcloud') {
+            steps {
+                script {
+                    // Authenticate with Google Cloud using the service account
+                    sh '''
+                    echo "$GOOGLE_APPLICATION_CREDENTIALS" > /tmp/account.json
+                    gcloud auth activate-service-account --key-file=/tmp/account.json
+                    gcloud config set project internship-project-435019
+                    '''
+                }
             }
         }
 
         stage('Install kOps') {
             steps {
                 // Install kOps
-                sh 'curl -Lo kops https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d \'"\' -f 4)/kops-linux-amd64'
-                sh 'chmod +x kops'
-                sh 'sudo mv kops /usr/local/bin/kops'
+                sh '''
+                curl -Lo kops https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+                chmod +x kops
+                sudo mv kops /usr/local/bin/kops
+                '''
             }
         }
 
@@ -43,9 +57,12 @@ pipeline {
             steps {
                 script {
                     // Create Kubernetes cluster with kOps
-                    sh 'kops create cluster --name=${CLUSTER_NAME} --zones=us-central1-a --state=${KOPS_STATE_STORE}'
-                    sh 'kops update cluster ${CLUSTER_NAME} --yes'
-                    sh 'kops validate cluster --wait 4m'
+                    sh '''
+                    kops create cluster --name=${CLUSTER_NAME} --zones=us-central1-a --state=${KOPS_STATE_STORE}
+                    kops update cluster ${CLUSTER_NAME} --yes
+                    kops validate cluster --wait 5m
+                    kops export kubeconfig --admin
+                    '''
                 }
             }
         }
@@ -74,8 +91,10 @@ pipeline {
             steps {
                 script {
                     // Deploy PostgreSQL using Helm
-                    sh 'helm repo add bitnami https://charts.bitnami.com/bitnami'
-                    sh 'helm install my-postgresql bitnami/postgresql -f custom-postgres-values.yaml'
+                    sh '''
+                    helm repo add bitnami https://charts.bitnami.com/bitnami
+                    helm install my-postgresql bitnami/postgresql -f custom-postgres-values.yaml
+                    '''
                 }
             }
         }
