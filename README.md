@@ -51,6 +51,7 @@ Key features include:
     ```bash
     gcloud init
     gcloud auth login
+    gcloud auth application-default login
     gcloud config set project <YOUR_PROJECT_ID>
     ```
 3. Installing kOps:
