@@ -63,4 +63,12 @@ pipeline {
             }
         }
     }
+    post {
+        success {
+            echo "Waiting for 1 hour before cluster destruction"
+            sleep(time: 1, unit: "HOURS")
+            echo "Destroying the cluster"
+            sh "kops delete cluster --name ${clusterName} --yes"
+        }
+    }
 }
