@@ -1,0 +1,11 @@
+gcloud projects add-iam-policy-binding internship-project-435019 \
+    --member="serviceAccount:jenkins-deployment-service-acc@internship-project-435019.iam.gserviceaccount.com" \
+    --role="roles/container.admin"
+
+gcloud projects add-iam-policy-binding internship-project-435019 \
+    --member="serviceAccount:jenkins-deployment-service-acc@internship-project-435019.iam.gserviceaccount.com" \
+    --role="roles/iam.serviceAccountAdmin"
+
+gcloud projects add-iam-policy-binding internship-project-435019 \
+    --member="serviceAccount:jenkins-deployment-service-acc@internship-project-435019.iam.gserviceaccount.com" \
+    --role="roles/iam.serviceAccountUser"
