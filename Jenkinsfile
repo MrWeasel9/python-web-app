@@ -55,6 +55,9 @@ pipeline {
                     helm repo add bitnami https://charts.bitnami.com/bitnami
                     helm install my-postgresql bitnami/postgresql -f custom-postgres-values.yaml
                     helm install my-flask-app ./flask-app-chart
+                    sleep 300
+                    kubectl get svc
+                    kubectl get pods
                     '''
                 }
             }
