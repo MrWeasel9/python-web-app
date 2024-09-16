@@ -68,7 +68,7 @@ pipeline {
             echo "Waiting for 1 hour before cluster destruction"
             sleep(time: 1, unit: "HOURS")
             echo "Destroying the cluster"
-            sh "kops delete cluster --name ${clusterName} --yes"
+            sh "kops delete cluster --name=simple.k8s.local --yes"
         }
     }
 }
