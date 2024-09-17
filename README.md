@@ -4,7 +4,7 @@ This project involves developing and deploying a scalable Python Flask web appli
 The deployment pipeline is automated using Jenkins for CI/CD, ensuring continuous integration and delivery. Additionally, the application is monitored using Prometheus and Grafana, providing insights into performance and system metrics. <br>
 This project showcases a complete DevOps workflow, integrating Kubernetes for orchestration, Google Cloud for infrastructure, and Jenkins for seamless deployments.
 
-#### Key features include:
+### Key features include:
 - Kubernetes cluster setup with **kOps** (Google Cloud).
 - **Helm** for managing application deployment.
 - A containerised **Python Flask** app using Docker featuring a chatbot as the frontend.
