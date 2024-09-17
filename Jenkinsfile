@@ -110,9 +110,9 @@ pipeline {
                     export KOPS_STATE_STORE=gs://radu-kubernetes-clusters/
                     export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
                     echo "Waiting for 1 hour before cluster destruction"
-                    sleep(time: 1, unit: "HOURS")
+                    sleep 3600
                     echo "Destroying the cluster"
-                    kops delete cluster --name=simple.k8s.local --yes
+                    kops delete cluster --name=simple.k8s.local --state=$KOPS_STATE_STORE --yes
                     echo "Cluster destroyed"
                     '''
                 }
