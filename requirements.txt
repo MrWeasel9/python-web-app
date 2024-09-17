@@ -1,4 +1,5 @@
 flask
+prometheus_flask_exporter
 psycopg2-binary
 Flask-SQLAlchemy
 transformers

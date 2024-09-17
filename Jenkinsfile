@@ -6,6 +6,43 @@ pipeline {
                 git url: 'https://github.com/MrWeasel9/python-web-app.git', branch: 'development'
             }
         }
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                # Build Docker image from the Dockerfile
+                docker build -t mrweasel99/python-web-app:latest .
+                '''
+            }
+        }
+
+        stage('Login to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-id', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh '''
+                    # Login to Docker Hub using credentials from Jenkins
+                    echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                    '''
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                sh '''
+                # Push the Docker image to the Docker repository
+                docker push mrweasel99/python-web-app:latest
+                '''
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                sh '''
+                # Remove the image locally after pushing
+                docker rmi mrweasel99/python-web-app:latest || true
+                '''
+            }
+        }
         stage('Setup GCloud SDK') {
             steps {
                 withCredentials([file(credentialsId: 'c7f34f26-88e1-4487-af16-b47e1dc0b47a', variable: 'GCLOUD_KEY')]) {
@@ -53,11 +90,19 @@ pipeline {
                     export KOPS_STATE_STORE=gs://radu-kubernetes-clusters/
                     export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
                     helm repo add bitnami https://charts.bitnami.com/bitnami
+                    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                    helm repo add grafana https://grafana.github.io/helm-charts
                     helm install my-postgresql bitnami/postgresql -f custom-postgres-values.yaml
                     helm install my-flask-app ./flask-app-chart
+                    helm install prometheus prometheus-community/prometheus --namespace monitoring --create-namespace
+                    helm upgrade prometheus prometheus-community/prometheus --namespace monitoring -f custom-prometheus-values.yaml
+                    helm install grafana grafana/grafana --namespace monitoring
+                    echo "Waiting for 5 minutes before proceeding..."
                     sleep 300
                     kubectl get svc
                     kubectl get pods
+                    kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
                     '''
                 }
             }
