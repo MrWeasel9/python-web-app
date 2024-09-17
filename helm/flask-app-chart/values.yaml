@@ -5,7 +5,7 @@ image:
 
 env:
   - name: DB_URL
-    value: postgresql://postgres:postgres@bitnami-postgres-postgresql.default.svc.cluster.local:5432/postgres
+    value: postgresql://postgres:postgres@my-postgresql.default.svc.cluster.local:5432/postgres
 
 service:
   type: LoadBalancer

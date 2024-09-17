@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, make_response, render_template # type: ignore
 from flask_sqlalchemy import SQLAlchemy # type: ignore
+from prometheus_flask_exporter import PrometheusMetrics
 from os import environ
 
 from transformers import AutoModelForCausalLM, AutoTokenizer # type: ignore
@@ -9,7 +10,7 @@ model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DB_URL')
-
+metrics = PrometheusMetrics(app)
 db = SQLAlchemy(app)
 
 # Define a model for the database
