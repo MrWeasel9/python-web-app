@@ -85,35 +85,39 @@ pipeline {
         }
         stage('Helm application deployment') {
             steps {
+                sh '''
+                helm repo add bitnami https://charts.bitnami.com/bitnami
+                helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                helm repo add grafana https://grafana.github.io/helm-charts
+                helm install my-postgresql bitnami/postgresql -f ./helm/custom-postgres-values.yaml
+                helm install my-flask-app ./helm/flask-app-chart
+                helm install prometheus prometheus-community/prometheus --namespace monitoring --create-namespace -f ./helm/custom-prometheus-values.yaml
+                helm install grafana grafana/grafana --namespace monitoring -f ./helm/custom-grafana-values.yaml
+                echo "Waiting for 6 minutes before proceeding..."
+                sleep 360
+                kubectl get svc
+                kubectl get pods
+                kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+                kubectl get svc --namespace monitoring
+                '''
+                
+            }
+        }
+        stage('Destroy Kubernetes cluster') {
+            steps {
                 withCredentials([file(credentialsId: 'c7f34f26-88e1-4487-af16-b47e1dc0b47a', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh '''
                     export KOPS_STATE_STORE=gs://radu-kubernetes-clusters/
                     export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
-                    helm repo add bitnami https://charts.bitnami.com/bitnami
-                    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-                    helm repo add grafana https://grafana.github.io/helm-charts
-                    helm install my-postgresql bitnami/postgresql -f custom-postgres-values.yaml
-                    helm install my-flask-app ./flask-app-chart
-                    helm install prometheus prometheus-community/prometheus --namespace monitoring --create-namespace
-                    helm upgrade prometheus prometheus-community/prometheus --namespace monitoring -f custom-prometheus-values.yaml
-                    helm install grafana grafana/grafana --namespace monitoring
-                    echo "Waiting for 5 minutes before proceeding..."
-                    sleep 300
-                    kubectl get svc
-                    kubectl get pods
-                    kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
-
+                    echo "Waiting for 1 hour before cluster destruction"
+                    sleep(time: 1, unit: "HOURS")
+                    echo "Destroying the cluster"
+                    kops delete cluster --name=simple.k8s.local --yes
+                    echo "Cluster destroyed"
                     '''
                 }
             }
         }
     }
-    post {
-        success {
-            echo "Waiting for 1 hour before cluster destruction"
-            sleep(time: 1, unit: "HOURS")
-            echo "Destroying the cluster"
-            sh "kops delete cluster --name=simple.k8s.local --yes"
-        }
-    }
+    
 }

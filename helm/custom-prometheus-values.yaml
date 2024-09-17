@@ -1,3 +1,7 @@
+server:
+  service:
+    type: LoadBalancer
+
 scrape_configs:
   - job_name: 'flask-app'
     static_configs:
