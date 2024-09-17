@@ -1,7 +1,7 @@
 # DevOps Project: Kubernetes Cluster Deployment of a Python Web App ☸️🐳🐍🤵🏻
 
 This project involves developing and deploying a scalable Python Flask web application with a PostgreSQL database, utilizing a comprehensive range of DevOps tools and practices. The application will be containerized using Docker and orchestrated using Kubernetes, with infrastructure managed on Google Cloud using kOps. The database is deployed via a Bitnami Helm chart, and the Flask application communicates with it through an API. 
-The deployment pipeline is automated using Jenkins for CI/CD, ensuring continuous integration and delivery. Additionally, the application is monitored using Prometheus and Grafana, providing insights into performance and system metrics. 
+The deployment pipeline is automated using Jenkins for CI/CD, ensuring continuous integration and delivery. Additionally, the application is monitored using Prometheus and Grafana, providing insights into performance and system metrics. <br>
 This project showcases a complete DevOps workflow, integrating Kubernetes for orchestration, Google Cloud for infrastructure, and Jenkins for seamless deployments.
 
 Key features include:
