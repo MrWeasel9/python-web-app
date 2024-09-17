@@ -126,4 +126,4 @@ Then, on any web browser just use http://your-ip-address:4000/
   - Link it to this project and check the GitHub hook trigger for GITScm polling
   - In the pipeline definition choose Pipeline Script from SCM
   - Choose Git and set the Script path to "Jenkinsfile"
-☸️
+
