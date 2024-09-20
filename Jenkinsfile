@@ -93,6 +93,9 @@ pipeline {
                 helm install my-flask-app ./helm/flask-app-chart
                 helm install prometheus prometheus-community/prometheus --namespace monitoring --create-namespace -f ./helm/custom-prometheus-values.yaml
                 helm install grafana grafana/grafana --namespace monitoring -f ./helm/custom-grafana-values.yaml
+                helm upgrade --install loki grafana/loki-stack --namespace logging --create-namespace
+                helm upgrade --install promtail grafana/promtail --namespace logging --set config.lokiAddress=http://loki:3100/loki/api/v1/push
+
                 echo "Waiting for 6 minutes before proceeding..."
                 sleep 360
                 kubectl get svc
