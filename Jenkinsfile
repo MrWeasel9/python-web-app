@@ -76,8 +76,8 @@ pipeline {
                     kops create cluster --name=simple.k8s.local --zones=us-central1-a --state=$KOPS_STATE_STORE
                     kops update cluster --name=simple.k8s.local --yes
                     kops export kubeconfig --admin
-                    echo "Waiting for 4 minutes before proceeding..."
-                    sleep 240
+                    echo "Waiting for 5 minutes before proceeding..."
+                    sleep 300
                     
                     '''
                 }
@@ -93,11 +93,9 @@ pipeline {
                 helm install my-flask-app ./helm/flask-app-chart
                 helm install prometheus prometheus-community/prometheus --namespace monitoring --create-namespace -f ./helm/custom-prometheus-values.yaml
                 helm install grafana grafana/grafana --namespace monitoring -f ./helm/custom-grafana-values.yaml
-                helm upgrade --install loki grafana/loki-stack --namespace logging --create-namespace
-                helm upgrade --install promtail grafana/promtail --namespace logging --set config.lokiAddress=http://loki:3100/loki/api/v1/push
 
-                echo "Waiting for 6 minutes before proceeding..."
-                sleep 360
+                echo "Waiting for 7 minutes before proceeding..."
+                sleep 420
                 kubectl get svc
                 kubectl get pods
                 kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
